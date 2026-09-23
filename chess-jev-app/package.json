@@ -1,16 +1,17 @@
 {
-  "name": "chess-jev-app",
+  "name": "jevchess",
   "version": "1.0.0",
-  "description": "Blitz/Bullet Chess Web App powered by JEV via Vercel AI Gateway",
+  "description": "JEVChess - AI Blitz & Bullet Chess powered by JEV System-One",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
     "test": "jest --detectOpenHandles --forceExit"
   },
   "dependencies": {
-    "@typesafe-ai/sdk": "^1.0.0",
+    "@typesafe-ai/sdk": "^0.6.0",
     "chess.js": "^1.0.0-beta.6",
     "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
     "express": "^4.19.2"
   },
   "devDependencies": {
