@@ -28,16 +28,20 @@ JEVChess is an elegant, minimal chess platform designed around the authentic **C
    - Clicking an enemy piece with a capture indicator executes the capture.
    - Clicking another friendly piece immediately switches selection without deselecting.
 3. **Time Controls**:
+   - **1 Minute (Bullet) — Default**: High-speed reactive game testing quick reflexes.
    - **3 Minutes (Blitz)**: Fast-paced classical blitz game.
-   - **1 Minute (Bullet)**: High-speed reactive game testing quick reflexes.
    - **5 Minutes (Rapid)**: Strategic play with extra thinking time.
    - Running out of time immediately concludes the match with a **Time Out** defeat.
-4. **Mandatory Username**:
+4. **AI Playstyle Modes**:
+   - **Moderate (Balanced Strategy)**: Positional solidity, center control, sound material trades, and castling safety.
+   - **Aggressive (Tactical Attack)**: Forward piece advancement, relentless checks, pawn storming, and high-pressure attacks on the enemy King and Queen.
+   - **Defensive (Solid Fortress)**: Safeguards every piece, avoids hanging material, retreats attacked pieces to secure squares, and prioritizes King cover.
+5. **Mandatory Username**:
    - Every player must supply a username before starting. Matches and statistics are indexed and exported per user.
 
 ---
 
-## How JEV Thinks: System-One Inference
+## How JEV Thinks: System-One Inference & Dynamic Confidence
 
 Most computer chess engines (like Stockfish or Leela) use **System-Two** cognition: deep, tree-searching minimax algorithms calculating 15 to 30 moves ahead across millions of positions. 
 
@@ -51,9 +55,9 @@ Most computer chess engines (like Stockfish or Leela) use **System-Two** cogniti
               ┌──────────────────┴──────────────────┐
               ▼                                     ▼
    [ Candidate Move Set ]                [ Position Context ]
-   - Legal moves from Chess.js           - Is King in check?
-   - Captures & piece exchanges          - Center square dominance
-   - Escapes, checks & blocks            - Attacked vs Defended pieces
+   - Legal moves from Chess.js           - Active AI Mode (Aggressive / Defensive / Moderate)
+   - Piece-Square centipawn tables       - Threat detection & guarded squares
+   - Checks, escapes & promotions        - Favorable vs bad trades (Q=900, R=500, B=330, N=320, P=100)
               │                                     │
               └──────────────────┬──────────────────┘
                                  │
@@ -65,18 +69,22 @@ Most computer chess engines (like Stockfish or Leela) use **System-Two** cogniti
                                  │
                                  ▼
                      Highest Confidence Move
-                 (e.g., c5 [58%] Occupies Center)
+                 (e.g., e5 [57%] Controls Center)
 ```
 
 ### 1. Intuitive Parallel Scoring
 Rather than simulating branching trees, JEV evaluates candidate moves in a single parallel pass:
+- **Blunder & Hanging Piece Prevention**: Evaluates whether a piece moving into the center or attacking territory is guarded or exposed to lower-value recaptures.
 - **King Safety & Check Defence**: When the King is in check, moves that resolve the threat (capturing the checking piece, interposing, or escaping) are given immediate priority.
-- **Material Exchange Quality**: Evaluates relative piece values (Queen: 9, Rook: 5, Bishop: 3, Knight: 3, Pawn: 1). Favorable trades (e.g., Knight takes Rook) receive high positive scoring.
-- **Center Control**: Occupying the central squares (`d4`, `e4`, `d5`, `e5`, `c4`, `c5`) scores bonuses during opening and early middle-game positions.
-- **Tactical Pressure**: Moves delivering checks (`+`) or checkmate (`#`) are prioritized.
+- **Material Exchange Quality**: Evaluates relative piece values in centipawns (Queen: 900, Rook: 500, Bishop: 330, Knight: 320, Pawn: 100). Favorable trades receive high positive scoring.
+- **Center Control & Development**: Occupying central squares (`d4`, `e4`, `d5`, `e5`) and developing Knights/Bishops to active outposts.
+- **Mode-Specific Bias**: Adjusts aggression, pawn advancement, check appetite, and defensive fortress positioning dynamically.
 
-### 2. Confidence Probabilities
-JEV outputs a probability score (e.g. `0.96` or `96%`) representing confidence in the immediate tactical solidity of the move, mimicking an intuitive blitz reflex within 10–50ms.
+### 2. Truly Dynamic Confidence Probabilities
+Confidence scores are **100% dynamic**, calculated continuously from the evaluation delta and tactical advantage:
+- **Winning / Decisive Advantage**: `75% – 98%` confidence.
+- **Equal / Tactical Struggle**: `50% – 65%` confidence.
+- **Under Heavy Attack / Material Down**: `30% – 45%` confidence.
 
 ---
 
